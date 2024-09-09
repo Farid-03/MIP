@@ -4,7 +4,15 @@ import mjolnir from '../../resources/img/mjolnir.png';
 import { Component } from 'react';
 
 class RandomChar extends Component {
+    state = {
+        name:null,
+        description: null,
+        thumbnail: null,
+        homepage: null,
+        wiki: null
+    }
     render () {
+        const {name, description, thumbnail, homepage, wiki} = this.state
         return (
             <div className="randomchar">
             <div className="randomchar__block">
