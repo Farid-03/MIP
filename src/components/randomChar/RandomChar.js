@@ -1,10 +1,12 @@
 import './randomChar.scss';
 import thor from '../../resources/img/thor.jpeg';
 import mjolnir from '../../resources/img/mjolnir.png';
+import { Component } from 'react';
 
-const RandomChar = () => {
-    return (
-        <div className="randomchar">
+class RandomChar extends Component {
+    render () {
+        return (
+            <div className="randomchar">
             <div className="randomchar__block">
                 <img src={thor} alt="Random character" className="randomchar__img"/>
                 <div className="randomchar__info">
@@ -36,7 +38,8 @@ const RandomChar = () => {
                 <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
             </div>
         </div>
-    )
+        )
+    }
 }
 
 export default RandomChar;
