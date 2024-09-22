@@ -16,11 +16,11 @@ class RandomChar extends Component {
         return (
             <div className="randomchar">
             <div className="randomchar__block">
-                <img src={thor} alt="Random character" className="randomchar__img"/>
+                <img src={thumbnail} alt="Random character" className="randomchar__img"/>
                 <div className="randomchar__info">
-                    <p className="randomchar__name">Thor</p>
+                    <p className="randomchar__name">{name}</p>
                     <p className="randomchar__descr">
-                        As the Norse God of thunder and lightning, Thor wields one of the greatest weapons ever made, the enchanted hammer Mjolnir. While others have described Thor as an over-muscled, oafish imbecile, he's quite smart and compassionate...
+                        {description}
                     </p>
                     <div className="randomchar__btns">
                         <a href="#" className="button button__main">
