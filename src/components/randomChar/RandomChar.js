@@ -11,6 +11,7 @@ class RandomChar extends Component {
 
 	state = {
 		char: {},
+		isDescriptionExpanded: false,
 	}
 
 	marvelService = new MarvelService()
@@ -23,10 +24,29 @@ class RandomChar extends Component {
 		const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000)
 		this.marvelService.getCharacter(id).then(this.onChatLoaded)
 	}
+
+	toggleDescription = () => {
+		this.setState(prevState => ({
+			isDescriptionExpanded: !prevState.isDescriptionExpanded,
+		}))
+	}
+
 	render() {
 		const {
 			char: { name, description, thumbnail, homepage, wiki },
+			isDescriptionExpanded,
 		} = this.state
+
+		let displayDescription
+
+		if (!description) {
+			displayDescription = 'NOT FOUND'
+		} else if (isDescriptionExpanded || description.length <= 100) {
+			displayDescription = description
+		} else {
+			displayDescription = description.slice(0, 97)
+		}
+
 		return (
 			<div className='randomchar'>
 				<div className='randomchar__block'>
@@ -37,7 +57,19 @@ class RandomChar extends Component {
 					/>
 					<div className='randomchar__info'>
 						<p className='randomchar__name'>{name}</p>
-						<p className='randomchar__descr'>{description}</p>
+						<p className='randomchar__descr'>
+							{displayDescription}
+							{description &&
+								description.length > 100 &&
+								!isDescriptionExpanded && (
+									<span
+										onClick={this.toggleDescription}
+										className='toggle-text'
+									>
+										{'...'}
+									</span>
+								)}
+						</p>
 						<div className='randomchar__btns'>
 							<a href={homepage} className='button button__main'>
 								<div className='inner'>homepage</div>
