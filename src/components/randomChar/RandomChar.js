@@ -1,7 +1,8 @@
+import { Component } from 'react'
+import Spinner from '../spinner/Spinner'
+import MarvelService from '../../services/MarvelService'
 import './randomChar.scss'
 import mjolnir from '../../resources/img/mjolnir.png'
-import MarvelService from '../../services/MarvelService'
-import { Component } from 'react'
 
 class RandomChar extends Component {
 	constructor(props) {
@@ -12,17 +13,29 @@ class RandomChar extends Component {
 	state = {
 		char: {},
 		isDescriptionExpanded: false,
+		loading: true,
+		error: false,
 	}
 
 	marvelService = new MarvelService()
 
 	onChatLoaded = char => {
-		this.setState({ char })
+		this.setState({ char, loading: false })
+	}
+
+	onError = () => {
+		this.setState({
+			loading: false,
+			error: true,
+		})
 	}
 
 	updateChar = () => {
 		const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000)
-		this.marvelService.getCharacter(id).then(this.onChatLoaded)
+		this.marvelService
+			.getCharacter(id)
+			.then(this.onChatLoaded)
+			.catch(this.onError)
 	}
 
 	toggleDescription = () => {
@@ -32,54 +45,11 @@ class RandomChar extends Component {
 	}
 
 	render() {
-		const {
-			char: { name, description, thumbnail, homepage, wiki },
-			isDescriptionExpanded,
-		} = this.state
-
-		let displayDescription
-
-		if (!description) {
-			displayDescription = 'NOT FOUND'
-		} else if (isDescriptionExpanded || description.length <= 100) {
-			displayDescription = description
-		} else {
-			displayDescription = description.slice(0, 97)
-		}
+		const { char, loading } = this.state
 
 		return (
 			<div className='randomchar'>
-				<div className='randomchar__block'>
-					<img
-						src={thumbnail}
-						alt='Random character'
-						className='randomchar__img'
-					/>
-					<div className='randomchar__info'>
-						<p className='randomchar__name'>{name}</p>
-						<p className='randomchar__descr'>
-							{displayDescription}
-							{description &&
-								description.length > 100 &&
-								!isDescriptionExpanded && (
-									<span
-										onClick={this.toggleDescription}
-										className='toggle-text'
-									>
-										{'...'}
-									</span>
-								)}
-						</p>
-						<div className='randomchar__btns'>
-							<a href={homepage} className='button button__main'>
-								<div className='inner'>homepage</div>
-							</a>
-							<a href={wiki} className='button button__secondary'>
-								<div className='inner'>Wiki</div>
-							</a>
-						</div>
-					</div>
-				</div>
+				{loading ? <Spinner /> : <View char={char} />}
 				<div className='randomchar__static'>
 					<p className='randomchar__title'>
 						Random character for today!
@@ -95,6 +65,54 @@ class RandomChar extends Component {
 			</div>
 		)
 	}
+}
+
+const View = ({ char }) => {
+	const {
+		name,
+		description,
+		thumbnail,
+		homepage,
+		wiki,
+		isDescriptionExpanded,
+	} = char
+
+	let displayDescription
+
+	if (!description) {
+		displayDescription = 'NOT FOUND'
+	} else if (isDescriptionExpanded || description.length <= 100) {
+		displayDescription = description
+	} else {
+		displayDescription = description.slice(0, 97)
+	}
+
+	return (
+		<div className='randomchar__block'>
+			<img src={thumbnail} alt='Random character' className='randomchar__img' />
+			<div className='randomchar__info'>
+				<p className='randomchar__name'>{name}</p>
+				<p className='randomchar__descr'>
+					{displayDescription}
+					{description &&
+						description.length > 100 &&
+						!isDescriptionExpanded && (
+							<span onClick={this.toggleDescription} className='toggle-text'>
+								{'...'}
+							</span>
+						)}
+				</p>
+				<div className='randomchar__btns'>
+					<a href={homepage} className='button button__main'>
+						<div className='inner'>homepage</div>
+					</a>
+					<a href={wiki} className='button button__secondary'>
+						<div className='inner'>Wiki</div>
+					</a>
+				</div>
+			</div>
+		</div>
+	)
 }
 
 export default RandomChar
