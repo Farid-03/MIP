@@ -1,5 +1,6 @@
 import { Component } from 'react'
 import Spinner from '../spinner/Spinner'
+import ErrorMessage from '../errorMessage/ErrorMessage'
 import MarvelService from '../../services/MarvelService'
 import './randomChar.scss'
 import mjolnir from '../../resources/img/mjolnir.png'
@@ -45,11 +46,23 @@ class RandomChar extends Component {
 	}
 
 	render() {
-		const { char, loading } = this.state
+		const { char, loading, error } = this.state
+		const errorMessage = error ? <ErrorMessage /> : null
+		const spinner = loading ? <Spinner /> : null
+		const content = !(loading || error) ? (
+			<View
+				char={char}
+				isDescriptionExpanded={this.state.isDescriptionExpanded}
+				toggleDescription={this.toggleDescription}
+			/>
+		) : null
 
 		return (
 			<div className='randomchar'>
-				{loading ? <Spinner /> : <View char={char} />}
+				{errorMessage}
+				{spinner}
+				{content}
+				{/* {loading ? <Spinner /> : <View char={char} />} */}
 				<div className='randomchar__static'>
 					<p className='randomchar__title'>
 						Random character for today!
@@ -67,15 +80,8 @@ class RandomChar extends Component {
 	}
 }
 
-const View = ({ char }) => {
-	const {
-		name,
-		description,
-		thumbnail,
-		homepage,
-		wiki,
-		isDescriptionExpanded,
-	} = char
+const View = ({ char, toggleDescription, isDescriptionExpanded }) => {
+	const { name, description, thumbnail, homepage, wiki } = char
 
 	let displayDescription
 
@@ -97,7 +103,7 @@ const View = ({ char }) => {
 					{description &&
 						description.length > 100 &&
 						!isDescriptionExpanded && (
-							<span onClick={this.toggleDescription} className='toggle-text'>
+							<span onClick={toggleDescription} className='toggle-text'>
 								{'...'}
 							</span>
 						)}
