@@ -8,7 +8,6 @@ import mjolnir from '../../resources/img/mjolnir.png'
 class RandomChar extends Component {
 	constructor(props) {
 		super(props)
-		this.updateChar()
 	}
 
 	state = {
@@ -20,7 +19,15 @@ class RandomChar extends Component {
 
 	marvelService = new MarvelService()
 
-	onChatLoaded = char => {
+	componentDidMount() {
+		this.updateChar()
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.timerId)
+	}
+
+	onCharLoaded = char => {
 		this.setState({ char, loading: false })
 	}
 
@@ -35,7 +42,7 @@ class RandomChar extends Component {
 		const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000)
 		this.marvelService
 			.getCharacter(id)
-			.then(this.onChatLoaded)
+			.then(this.onCharLoaded)
 			.catch(this.onError)
 	}
 
@@ -62,7 +69,6 @@ class RandomChar extends Component {
 				{errorMessage}
 				{spinner}
 				{content}
-				{/* {loading ? <Spinner /> : <View char={char} />} */}
 				<div className='randomchar__static'>
 					<p className='randomchar__title'>
 						Random character for today!
@@ -70,7 +76,7 @@ class RandomChar extends Component {
 						Do you want to get to know him better?
 					</p>
 					<p className='randomchar__title'>Or choose another one</p>
-					<button className='button button__main'>
+					<button className='button button__main' onClick={this.updateChar}>
 						<div className='inner'>try it</div>
 					</button>
 					<img src={mjolnir} alt='mjolnir' className='randomchar__decoration' />
@@ -84,7 +90,6 @@ const View = ({ char, toggleDescription, isDescriptionExpanded }) => {
 	const { name, description, thumbnail, homepage, wiki } = char
 
 	let displayDescription
-
 	if (!description) {
 		displayDescription = 'NOT FOUND'
 	} else if (isDescriptionExpanded || description.length <= 100) {
@@ -93,9 +98,20 @@ const View = ({ char, toggleDescription, isDescriptionExpanded }) => {
 		displayDescription = description.slice(0, 97)
 	}
 
+	const isImageUnavailable =
+		thumbnail ===
+		'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg'
+	let imgClass
+
+	if (isImageUnavailable) {
+		imgClass = 'randomchar__img contain'
+	} else {
+		imgClass = 'randomchar__img'
+	}
+
 	return (
 		<div className='randomchar__block'>
-			<img src={thumbnail} alt='Random character' className='randomchar__img' />
+			<img src={thumbnail} alt='Random character' className={imgClass} />
 			<div className='randomchar__info'>
 				<p className='randomchar__name'>{name}</p>
 				<p className='randomchar__descr'>

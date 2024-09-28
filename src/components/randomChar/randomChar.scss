@@ -61,3 +61,7 @@
 		right: -37px;
 	}
 }
+
+.randomchar__img.contain {
+	object-fit: contain; // Изменяем на contain для недоступного изображения
+}
