@@ -6,20 +6,45 @@ import MarvelService from '../../services/MarvelService'
 class CharInfo extends Component {
 	state = {
 		char: {},
-		loading: true,
+		loading: false,
 		error: false,
 	}
 
 	marvelService = new MarvelService()
+
+	componentDidMount() {
+		this.updateChar()
+	}
 
 	updateChar = () => {
 		const { charId } = this.props
 		if (!charId) {
 			return
 		}
-
-		this.marvelService.getCharacter(charId).then().catch()
+		this.onCharLoading()
+		this.marvelService
+			.getCharacter(charId)
+			.then(this.onCharLoaded)
+			.catch(this.onError)
 	}
+
+	onCharLoaded = char => {
+		this.setState({ char, loading: false })
+	}
+
+	onCharLoading = () => {
+		this.setState({
+			loading: true,
+		})
+	}
+
+	onError = () => {
+		this.setState({
+			loading: false,
+			error: true,
+		})
+	}
+
 	render() {
 		return (
 			<div className='char__info'>
