@@ -35,7 +35,6 @@ class CharInfo extends Component {
 			.then(this.onCharLoaded)
 			.catch(this.onError)
 
-		this.foo.bar = 0
 	}
 
 	onCharLoaded = char => {
@@ -77,8 +76,7 @@ const View = ({ char }) => {
 	const { name, description, thumbnail, homepage, wiki, comics } = char
 
 	const isImageUnavailable =
-		thumbnail ===
-		'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg'
+		thumbnail === "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"
 	let imgClass
 
 	if (isImageUnavailable) {
@@ -86,6 +84,7 @@ const View = ({ char }) => {
 	} else {
 		imgClass = 'char__basics'
 	}
+	
 	return (
 		<>
 			<div className='char__basics'>
