@@ -7,8 +7,8 @@ class CharList extends Component {
     state = {
         characters: [],
         loading: true,
-        offset: 0, // Для отслеживания смещения
-        newItemsLoading: false, // Для отслеживания загрузки новых элементов
+        offset: 0,
+        newItemsLoading: false,
     };
 
     marvelService = new MarvelService();
@@ -18,15 +18,15 @@ class CharList extends Component {
     }
 
     fetchCharacters = async () => {
-        this.setState({ newItemsLoading: true }); // Начало загрузки новых элементов
+        this.setState({ newItemsLoading: true }); 
 
         try {
             const { offset, characters } = this.state;
             const charactersData = await this.marvelService.getAllCharacters(offset);
             if (Array.isArray(charactersData)) {
                 this.setState({
-                    characters: [...characters, ...charactersData], // Добавляем новых персонажей
-                    offset: offset + 9, // Увеличиваем смещение
+                    characters: [...characters, ...charactersData],
+                    offset: offset + 9,
                 });
             } else {
                 console.error('Expected an array but received:', charactersData);
@@ -34,15 +34,15 @@ class CharList extends Component {
         } catch (error) {
             console.error('Error fetching characters:', error);
         } finally {
-            this.setState({ loading: false, newItemsLoading: false }); // Завершение загрузки
+            this.setState({ loading: false, newItemsLoading: false });
         }
     };
 
     onCharSelected = (id) => {
-        this.props.onCharSelected(id); // Вызываем переданный пропс
+        this.props.onCharSelected(id); 
         window.scrollTo({
             top: 0,
-            behavior: 'smooth', // Плавная прокрутка вверх
+            behavior: 'smooth', 
         });
     };
 
@@ -66,7 +66,7 @@ class CharList extends Component {
                             <li
                                 key={char.id}
                                 className='char__item'
-                                onClick={() => this.onCharSelected(char.id)} // Добавлено вызов прокрутки вверх
+                                onClick={() => this.onCharSelected(char.id)} 
                             >
                                 <img src={char.thumbnail} alt={char.name} style={imgStyle} />
                                 <div className='char__name'>{char.name}</div>
@@ -76,8 +76,8 @@ class CharList extends Component {
                 </ul>
                 <button
                     className='button button__main button__long'
-                    onClick={this.fetchCharacters} // Добавлен обработчик клика
-                    disabled={newItemsLoading} // Блокируем кнопку во время загрузки
+                    onClick={this.fetchCharacters} 
+                    disabled={newItemsLoading} 
                 >
                     <div className='inner'>
                         {newItemsLoading ? 'loading...' : 'load more'}
