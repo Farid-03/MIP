@@ -1,69 +1,91 @@
-import React, { Component } from 'react'
-import './charList.scss'
-import MarvelService from '../../services/MarvelService'
-import Spinner from '../spinner/Spinner'
+import React, { Component } from 'react';
+import './charList.scss';
+import MarvelService from '../../services/MarvelService';
+import Spinner from '../spinner/Spinner';
 
 class CharList extends Component {
-	state = {
-		characters: [],
-		loading: true,
-	}
+    state = {
+        characters: [],
+        loading: true,
+        offset: 0, // Для отслеживания смещения
+        newItemsLoading: false, // Для отслеживания загрузки новых элементов
+    };
 
-	marvelService = new MarvelService()
+    marvelService = new MarvelService();
 
-	componentDidMount() {
-		this.fetchCharacters()
-	}
+    componentDidMount() {
+        this.fetchCharacters();
+    }
 
-	fetchCharacters = async () => {
-		try {
-			const charactersData = await this.marvelService.getAllCharacters()
-			if (Array.isArray(charactersData)) {
-				this.setState({ characters: charactersData })
-			} else {
-				console.error('Expected an array but received:', charactersData)
-			}
-		} catch (error) {
-			console.error('Error fetching characters:', error)
-		} finally {
-			this.setState({ loading: false })
-		}
-	}
+    fetchCharacters = async () => {
+        this.setState({ newItemsLoading: true }); // Начало загрузки новых элементов
 
-	render() {
-		const { characters, loading } = this.state
+        try {
+            const { offset, characters } = this.state;
+            const charactersData = await this.marvelService.getAllCharacters(offset);
+            if (Array.isArray(charactersData)) {
+                this.setState({
+                    characters: [...characters, ...charactersData], // Добавляем новых персонажей
+                    offset: offset + 9, // Увеличиваем смещение
+                });
+            } else {
+                console.error('Expected an array but received:', charactersData);
+            }
+        } catch (error) {
+            console.error('Error fetching characters:', error);
+        } finally {
+            this.setState({ loading: false, newItemsLoading: false }); // Завершение загрузки
+        }
+    };
 
-		if (loading) {
-			return <Spinner />
-		}
+    onCharSelected = (id) => {
+        this.props.onCharSelected(id); // Вызываем переданный пропс
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth', // Плавная прокрутка вверх
+        });
+    };
 
-		return (
-			<div className='char__list'>
-				<ul className='char__grid'>
-					{characters.map(char => {
-						const isImageAvailable =
-							char.thumbnail !==
-							'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg'
-						const imgStyle = isImageAvailable ? {} : { objectFit: 'unset' }
+    render() {
+        const { characters, loading, newItemsLoading } = this.state;
 
-						return (
-							<li
-								key={char.id}
-								className='char__item'
-								onClick={() => this.props.onCharSelected(char.id)}
-							>
-								<img src={char.thumbnail} alt={char.name} style={imgStyle} />
-								<div className='char__name'>{char.name}</div>
-							</li>
-						)
-					})}
-				</ul>
-				<button className='button button__main button__long'>
-					<div className='inner'>load more</div>
-				</button>
-			</div>
-		)
-	}
+        if (loading && characters.length === 0) {
+            return <Spinner />;
+        }
+
+        return (
+            <div className='char__list'>
+                <ul className='char__grid'>
+                    {characters.map((char) => {
+                        const isImageAvailable =
+                            char.thumbnail !==
+                            'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg';
+                        const imgStyle = isImageAvailable ? {} : { objectFit: 'unset' };
+
+                        return (
+                            <li
+                                key={char.id}
+                                className='char__item'
+                                onClick={() => this.onCharSelected(char.id)} // Добавлено вызов прокрутки вверх
+                            >
+                                <img src={char.thumbnail} alt={char.name} style={imgStyle} />
+                                <div className='char__name'>{char.name}</div>
+                            </li>
+                        );
+                    })}
+                </ul>
+                <button
+                    className='button button__main button__long'
+                    onClick={this.fetchCharacters} // Добавлен обработчик клика
+                    disabled={newItemsLoading} // Блокируем кнопку во время загрузки
+                >
+                    <div className='inner'>
+                        {newItemsLoading ? 'loading...' : 'load more'}
+                    </div>
+                </button>
+            </div>
+        );
+    }
 }
 
-export default CharList
+export default CharList;
