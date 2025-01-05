@@ -13,7 +13,7 @@ const CharList = ({ onCharSelected }) => {
 
 	useEffect(() => {
 		fetchCharacters()
-	}, []) // Зависимости пустые, чтобы вызывать только при монтировании
+	}, []) 
 
 	const fetchCharacters = async () => {
 		setNewItemsLoading(true)

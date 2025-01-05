@@ -1,147 +1,129 @@
-import { Component } from 'react'
-import Spinner from '../spinner/Spinner'
-import ErrorMessage from '../errorMessage/ErrorMessage'
-import MarvelService from '../../services/MarvelService'
-import './randomChar.scss'
-import mjolnir from '../../resources/img/mjolnir.png'
+import { useState, useEffect } from 'react';
+import Spinner from '../spinner/Spinner';
+import ErrorMessage from '../errorMessage/ErrorMessage';
+import MarvelService from '../../services/MarvelService';
+import './randomChar.scss';
+import mjolnir from '../../resources/img/mjolnir.png';
 
-class RandomChar extends Component {
-	constructor(props) {
-		super(props)
-	}
+const RandomChar = () => {
+    const [char, setChar] = useState({});
+    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
-	state = {
-		char: {},
-		isDescriptionExpanded: false,
-		loading: true,
-		error: false,
-	}
+    const marvelService = new MarvelService();
 
-	marvelService = new MarvelService()
+    useEffect(() => {
+        updateChar();
+    }, []);
 
-	componentDidMount() {
-		this.updateChar()
-	}
+    const updateChar = () => {
+        const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
+        onCharLoading();
+        marvelService
+            .getCharacter(id)
+            .then(onCharLoaded)
+            .catch(onError);
+    };
 
-	componentWillUnmount() {
-		clearInterval(this.timerId)
-	}
+    const onCharLoaded = (char) => {
+        setChar(char);
+        setLoading(false);
+    };
 
-	onCharLoaded = char => {
-		this.setState({ char, loading: false })
-	}
+    const onCharLoading = () => {
+        setLoading(true);
+    };
 
-	onCharLoading = () => {
-		this.setState({
-			loading: true,
-		})
-	}
+    const onError = () => {
+        setLoading(false);
+        setError(true);
+    };
 
-	onError = () => {
-		this.setState({
-			loading: false,
-			error: true,
-		})
-	}
+    const toggleDescription = () => {
+        setIsDescriptionExpanded(prevState => !prevState);
+    };
 
-	updateChar = () => {
-		const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000)
-		this.onCharLoading()
-		this.marvelService
-			.getCharacter(id)
-			.then(this.onCharLoaded)
-			.catch(this.onError)
-	}
+    const errorMessage = error ? <ErrorMessage /> : null;
+    const spinner = loading ? <Spinner /> : null;
+    const content = !(loading || error) ? (
+        <View
+            char={char}
+            isDescriptionExpanded={isDescriptionExpanded}
+            toggleDescription={toggleDescription}
+        />
+    ) : null;
 
-	toggleDescription = () => {
-		this.setState(prevState => ({
-			isDescriptionExpanded: !prevState.isDescriptionExpanded,
-		}))
-	}
-
-	render() {
-		const { char, loading, error } = this.state
-		const errorMessage = error ? <ErrorMessage /> : null
-		const spinner = loading ? <Spinner /> : null
-		const content = !(loading || error) ? (
-			<View
-				char={char}
-				isDescriptionExpanded={this.state.isDescriptionExpanded}
-				toggleDescription={this.toggleDescription}
-			/>
-		) : null
-
-		return (
-			<div className='randomchar'>
-				{errorMessage}
-				{spinner}
-				{content}
-				<div className='randomchar__static'>
-					<p className='randomchar__title'>
-						Random character for today!
-						<br />
-						Do you want to get to know him better?
-					</p>
-					<p className='randomchar__title'>Or choose another one</p>
-					<button className='button button__main' onClick={this.updateChar}>
-						<div className='inner'>try it</div>
-					</button>
-					<img src={mjolnir} alt='mjolnir' className='randomchar__decoration' />
-				</div>
-			</div>
-		)
-	}
-}
+    return (
+        <div className='randomchar'>
+            {errorMessage}
+            {spinner}
+            {content}
+            <div className='randomchar__static'>
+                <p className='randomchar__title'>
+                    Random character for today!
+                    <br />
+                    Do you want to get to know him better?
+                </p>
+                <p className='randomchar__title'>Or choose another one</p>
+                <button className='button button__main' onClick={updateChar}>
+                    <div className='inner'>try it</div>
+                </button>
+                <img src={mjolnir} alt='mjolnir' className='randomchar__decoration' />
+            </div>
+        </div>
+    );
+};
 
 const View = ({ char, toggleDescription, isDescriptionExpanded }) => {
-	const { name, description, thumbnail, homepage, wiki } = char
+    const { name, description, thumbnail, homepage, wiki } = char;
 
-	let displayDescription
-	if (!description) {
-		displayDescription = 'NOT FOUND'
-	} else if (isDescriptionExpanded || description.length <= 100) {
-		displayDescription = description
-	} else {
-		displayDescription = description.slice(0, 97)
-	}
+    let displayDescription;
+    if (!description) {
+        displayDescription = 'NOT FOUND';
+    } else if (isDescriptionExpanded || description.length <= 100) {
+        displayDescription = description;
+    } else {
+        displayDescription = description.slice(0, 97);
+    }
 
-	const isImageUnavailable =
-		thumbnail ===
-		'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg'
-	let imgClass
+    const isImageUnavailable =
+        thumbnail ===
+        'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg';
+    let imgClass;
 
-	if (isImageUnavailable) {
-		imgClass = 'randomchar__img contain'
-	} else {
-		imgClass = 'randomchar__img'
-	}
+    if (isImageUnavailable) {
+        imgClass = 'randomchar__img contain';
+    } else {
+        imgClass = 'randomchar__img';
+    }
 
-	return (
-		<div className='randomchar__block'>
-			<img src={thumbnail} alt='Random character' className={imgClass} />
-			<div className='randomchar__info'>
-				<p className='randomchar__name'>{name}</p>
-				<p className='randomchar__descr'>
-					{displayDescription}
-					{description &&
-						description.length > 100 &&
-						!isDescriptionExpanded && (
-							<span onClick={toggleDescription} className='toggle-text'>
-								{'...'}
-							</span>
-						)}
-				</p>
-				<div className='randomchar__btns'>
-					<a href={homepage} className='button button__main'>
-						<div className='inner'>homepage</div>
-					</a>
-					<a href={wiki} className='button button__secondary'>
-						<div className='inner'>Wiki</div>
-					</a>
-				</div>
-			</div>
-		</div>
-	)
-}
+    return (
+        <div className='randomchar__block'>
+            <img src={thumbnail} alt='Random character' className={imgClass} />
+            <div className='randomchar__info'>
+                <p className='randomchar__name'>{name}</p>
+                <p className='randomchar__descr'>
+                    {displayDescription}
+                    {description &&
+                        description.length > 100 &&
+                        !isDescriptionExpanded && (
+                            <span onClick={toggleDescription} className='toggle-text'>
+                                {'...'}
+                            </span>
+                        )}
+                </p>
+                <div className='randomchar__btns'>
+                    <a href={homepage} className='button button__main'>
+                        <div className='inner'>homepage</div>
+                    </a>
+                    <a href={wiki} className='button button__secondary'>
+                        <div className='inner'>Wiki</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    );
+};
 
-export default RandomChar
+export default RandomChar;
